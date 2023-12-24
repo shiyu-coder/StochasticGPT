@@ -234,10 +234,11 @@ def extract_paper_structure(paper_text):
 if __name__ == '__main__':
     root_path = f"../StochasticGPT_data/paper/2212.10273/DCU-AQ.tex"
     paper_text = TextLoader(root_path).load()[0].page_content
+    print(paper_text)
 
-    dt_paper_info = extract_paper_structure(paper_text)
+    # dt_paper_info = extract_paper_structure(paper_text)
 
-    print(dt_paper_info)
+    # print(dt_paper_info)
     result = {'overall_stu': {'nodes': [{'name': 'Title', 'type': 'title', 'parents': []}, {'name': 'Abstract', 'type': 'abstract', 'parents': ['Title']},
                                         {'name': 'Introduction', 'type': 'section', 'parents': ['Abstract']},
                                         {'name': 'Methodology', 'type': 'section', 'parents': ['Introduction']},
