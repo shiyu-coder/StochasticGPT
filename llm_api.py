@@ -15,6 +15,10 @@ from langchain.embeddings import OpenAIEmbeddings
 
 
 openai_api_base = "http://27.102.66.157:8000/v1"
+with open("../openai_key", "r") as f:
+    openai_api_key = f.read().strip()
+openai.api_base = openai_api_base
+openai.api_key = openai_api_key
 
 
 def get_date(date0, days):
@@ -222,10 +226,6 @@ def calc_tokens_num_from_text(text):
 
 class GPT:
     def __init__(self):
-        with open("../openai_key", "r") as f:
-            openai_api_key = f.read().strip()
-        openai.api_base = openai_api_base
-        openai.api_key = openai_api_key
         self.fee_path = "./record/fee.json"
         self.max_try_num = 3
         self.token_fee_dict = {
@@ -402,8 +402,44 @@ class GPT:
         return None
 
 
+def llm_request(request, system_content=None, temperature=0.0, max_tokens=None, llm_model="gpt-4-1106-preview", response_type="text"):
+    messages = [{'role': 'user', 'content': request}]
+    if not system_content:
+        system_content = "Assuming you are an expert in English paper polishing."
+    messages = [{'role': 'system', 'content': system_content}] + messages
+    max_try = 10
+    cur_try = 0
+    while cur_try < max_try:
+        try:
+            completion = openai.ChatCompletion.create(
+                model=llm_model,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                messages=messages,
+                response_format={"type": response_type}
+            )
+            reply = completion.choices[0]['message']['content']
+            return reply
+        except KeyboardInterrupt:
+            return
+        except openai.error.APIConnectionError:
+            print("APIConnectionError")
+            time.sleep(3)
+            cur_try += 1
+        except openai.error.RateLimitError:
+            traceback.print_exc()
+            time.sleep(60)
+            cur_try += 1
+        except:
+            traceback.print_exc()
+            time.sleep(3)
+            cur_try += 1
+    return None
+
+
 if __name__ == '__main__':
     model = GPT()
+    print(model.chat("给我讲个笑话"))
 
 
 
