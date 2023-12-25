@@ -31,11 +31,10 @@ def latex2markdown_gpt(latex_content):
     prompt = 'I will give you a code in latex, you should transfer it into markdown format. The latex code is:\n\n' + \
         latex_content + '\n\n' + 'You should only output the markdown content without any additional content. You response should begin with: The markdown format is:'
     completion = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4-1106-preview",
         messages=[{'role': 'system', 'content': 'you are a helpful assistant. You should fully comply with user instructions.'},
                 {'role': 'user', 'content': prompt}],
         temperature=0,
-        max_tokens=300,
         response_format={"type": 'text'},
     )
     return completion.choices[0]["message"]["content"][len('The markdown format is:'):].strip()
@@ -63,7 +62,7 @@ def latex2markdown(latex_content, input_type='str'):
     markdown_content = ''
     for i, part in enumerate(parts_):
         deal_part += part
-        if len(part) > 300:
+        if len(part) > 1000:
             markdown_content += latex2markdown_gpt(deal_part)
             markdown_content += '\n'
             deal_part = ''
