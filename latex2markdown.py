@@ -28,7 +28,7 @@ def post_handel(markdown_content):
     return markdown_content
 
 def latex2markdown_gpt(latex_content):
-    prompt = 'I will give you a code in latex, you should transfer it into markdown format. The latex code is:\n\n' + \
+    prompt = 'I will give you a code in latex, you should transfer it into markdown format, omitting images, tables, and other non-textual elements. The latex code is:\n\n' + \
         latex_content + '\n\n' + 'You should only output the markdown content without any additional content. You response should begin with: The markdown format is:'
     completion = openai.ChatCompletion.create(
         model="gpt-4-1106-preview",
