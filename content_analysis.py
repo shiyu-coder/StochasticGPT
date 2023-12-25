@@ -91,6 +91,42 @@ of what specific equipment would have been appropriate for their unique status. 
 "equipped accordingly," which slightly disrupts the flow.
 """
 
+
+def section_analysis(section_content, section_structure, overall_structure):
+    request = content_analysis_prompt.format(paper_structure=overall_structure, section_structure=section_structure, section_content=section_content,
+                                             content_analysis_example=content_analysis_example)
+    max_try = 3
+    try_count = 0
+    while try_count < max_try:
+        try:
+            reply = llm_request(request)
+            reply = replace_at_sentences(reply)
+            return reply
+        except KeyboardInterrupt:
+            return
+        except:
+            traceback.print_exc()
+            try_count += 1
+
+
+def section_analysis_async(dt_section, dt_section_structure, overall_structure):
+
+    def fun(section_pair, overall_structure):
+        section_content, section_structure = section_pair
+        return section_analysis(section_content, section_structure, overall_structure)
+
+    ls_section_pair = []
+    for section_label in dt_section.keys():
+        ls_section_pair.append((dt_section[section_label], dt_section_structure[section_label]))
+    ls_analysis_result = multiprocess(
+        func=fun,
+        paras=ls_section_pair,
+        overall_structure=overall_structure,
+        n_processes=min(len(ls_section_pair), get_cpu_count())
+    )
+    return ls_analysis_result
+
+
 if __name__ == '__main__':
     paper_structure = {'nodes': [{'name': 'Title', 'type': 'title', 'parents': []}, {'name': 'Abstract', 'type': 'abstract', 'parents': ['Title']},
                                  {'name': 'Introduction', 'type': 'section', 'parents': ['Abstract']},
@@ -123,11 +159,6 @@ if __name__ == '__main__':
 
     section_content = '\\label{sec:intro}\n\n\\begin{comment}\n% Just in case we want some form of Intro\nAccording to the World Health Organisation (WHO), 91\\% of the world\'s population reside in conditions where WHO\'s air quality guidelines levels were not met \\cite{organizacion2021global}. This report on 2016 also showed that ambient (outdoor) air pollution in both cities and rural areas was estimated to cause 4.2 million premature deaths worldwide. The research concluded that policies and investments supporting cleaner transport, energy-efficient homes, power generation, industry and better municipal waste management would would be crucial to the reduction of outdoor air pollution. In a separate report, it is estimated that air pollution globally accounts for roughly seven million premature deaths a year \\cite{Gar21}, where it was again stated that the majority of those deaths are caused by outdoor air pollution with the rest generally attributed to poor air quality from indoor cooking. While the majority of these deaths occur in developing countries, with China and India accounting for roughly 50\\%, developed countries also have a problem with deaths resulting from air pollution.\nIn this research, the focus will mostly be on the modelling of concentrations in particulate matter - tiny particles in the air generated both by natural processes and human activity. These particles are generally \n12  categorised (in the public health domain) by their diameter; fine particles with diameter less than 2.5 $\\mu$m are referred to as "PM2.5" and coarse particles with diameter between 2.5 and 10 $\\mu$m are referred to as "PM10".\\\\\n\\end{comment}\n\nThe Urban Life and Air Pollution task at MediaEval 2022 required participants to predict the air quality index (AQI) value at +1, +5 and +7 days using an archive of air quality, weather and images from 16 CCTV cameras, one image taken every 60 seconds  \\cite{UA22}. Participating groups were required to download the data from online sources for local processing.\nGaps in air quality datasets are common with the problem exacerbated for data gathered in poorer or developing countries \\cite{PINDER2019116794, Falge2001, Hui2004, Moffat2007, Kim2020}. In this paper we describe how we addressed the very large gaps in data that we encountered in the data we downloaded.\n\n\n%\\section{Related Work}\n%\\label{sec:rr}\n%.. a snapshot of how our graph? technique has been used for solving other problems.\n\n% Mark: I restructured this to stop duplication of text'
 
-    request = content_analysis_prompt.format(paper_structure=paper_structure, section_structure=section_structure, section_content=section_content,
-                                             content_analysis_example=content_analysis_example)
-    reply = llm_request(request)
-    print(reply)
-    reply = replace_at_sentences(reply)
-    print(reply)
+    print(section_analysis(section_content, section_structure, paper_structure))
 
 

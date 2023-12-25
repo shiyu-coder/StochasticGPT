@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import re
 import openai
 import os
