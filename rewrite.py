@@ -138,7 +138,7 @@ def rewrite_logic_issue(section_label, section_content, section_review, section_
 
                 The review advise is: {review_advise}
 
-                Ensure your response fully complies with compliance requirements and fulfill the task effectively."""
+                Ensure your response fully complies with requirements and fulfill the task effectively. You should output your further modified text directly in Latex format."""
                 
     prompt = logic_issue_prompt.format(section_label=section_label, section_content=section_content, section_structure=section_structure, review_advise=section_review, \
         example_content=example["example_content"], example_structure=example["example_structure"], example_review=example["example_review"], revise_result=example["example_result"])
@@ -320,8 +320,8 @@ def modify_based_on_reflect(section_label, original_text, logical_structure, rev
 
     The Urban Life and Air Pollution task at MediaEval 2022 presented a challenge that required participants to predict the air quality index (AQI) value at +1, +5, and +7 days using an archive of air quality, weather data, and images from 16 CCTV cameras, captured at one-minute intervals \cite{UA22}. This task underscored the critical need for accurate air quality forecasting, particularly in light of the frequent data gaps that are prevalent in datasets from less affluent regions \cite{PINDER2019116794, Falge2001, Hui2004, Moffat2007, Kim2020}. Our paper addresses these challenges by detailing a novel approach to mitigate the impact of substantial data gaps encountered in the datasets we analyzed. Through this work, we aim to contribute to the broader effort of improving air quality predictions, which is essential for public health and policy-making, especially in areas where data scarcity hinders environmental monitoring and management."""
         
-    example = f""" "example_content": {example_content} \n\n"logical structure": {example_structure} \n\n"review advice": {example_feedback} \n\n"modified version": {example_modified_text} \n
-    "reflection": {example_reflect} \n\n""further modification": {example_further_modify}"""
+    example = f""" "Original Section": {example_content} \n\n"Logical Structure of Original Text": {example_structure} \n\n"Review Advice": {example_feedback} \n\n"Revision Requirements": {revise_requirements}\n
+    "Your Modified Version": {example_modified_text} \n\n"Unsatisfied Points of Modified Version": {example_reflect} \n\n"Furether Modified Result": {example_further_modify}"""
                 
     remodify_prompt = """Objective: You are required to refine a section of an academic paper. This section, titled "{section_label}," has undergone previous revisions based on review advice. 
                         However, your current modifications have not fully met the review advice and revision requirements. 
@@ -329,7 +329,7 @@ def modify_based_on_reflect(section_label, original_text, logical_structure, rev
                         It's crucial to preserve the parts that don't need to be changed exactly as they are.
 
                         Formatting Requirements:
-                        Present your output in Latex format aligned with provided section. You should directly output the revised text without anything additional.
+                        Present your output in Latex format aligned with provided section. You should directly output the further revised text without anything additional analyse process.
 
                         Here are some examples for reference:
                         {examples}
@@ -337,19 +337,19 @@ def modify_based_on_reflect(section_label, original_text, logical_structure, rev
 
                         Components:
 
-                        Original Section: {original_text}
+                        "Original Section": {original_text}
 
-                        Logical Structure of Original Text: {logical_structure}
+                        "Logical Structure of Original Text": {logical_structure}
 
-                        Review Advice: {review_advise}
+                        "Review Advice": {review_advise}
 
-                        Revision Requirements: {revise_requirements}
+                        "Revision Requirements": {revise_requirements}
 
-                        Your Modified Version: {modified_text}
+                        "Your Modified Version": {modified_text}
 
-                        Unsatisfied Points of Modified Version: {unsatisfied_points}
-
-                        Your Task: Analyze your previous modification and further revise your text. Address the unsatisfied points to better meet the review advice and revision requirements.
+                        "Unsatisfied Points of Modified Version": {unsatisfied_points}
+                        
+                        You should output your further modified text directly in Latex format.
                         """
     prompt = remodify_prompt.format(section_label=section_label, original_text=original_text, logical_structure=logical_structure, review_advise=review_advise, revise_requirements=revise_requirements, \
         modified_text=modified_text, unsatisfied_points=unsatisfied_points, examples=example)
@@ -455,11 +455,24 @@ of what specific equipment would have been appropriate for their unique status. 
     The MediaEval 2022 competition included a task on Urban Life and Air Pollution, where the challenge was to forecast air quality indices using diverse datasets. The specifics of this task and the data involved are complex and multifaceted, encompassing various elements from CCTV imagery to meteorological data. Addressing the issue of data gaps, prevalent in air quality research, especially in underdeveloped regions, remains a significant challenge. This paper attempts to navigate these complexities, albeit without a focused methodology or clear research direction.
     """
     
+    example_content = """The downloaded air quality data are collected at 10 monitoring stations in Dalat City, Vietnam from March 2020  to 7th Nov 2022. The data includes air pollutant concentration for NO$_2$(ppm), CO, SO$_2$, O$_3$, PM1.0, PM2.5, PM10 as well as environmental measures namely temperature, humidity, UV, rainfall. In addition, traffic data, in form of images, was recorded every  minute from 16 CCTV cameras across Dalat City. Figure~\ref{fig:availability} shows the availability of the  dataset as downloaded by our group. This shows huge gaps in data availability.  In our model building we use the first 80\% of available data for training machine learning models and the remaining 20\% for validation.
+
+    \\begin{figure}[ht!]
+        \centering
+        \includegraphics[width=1.0\textwidth]{Data-gaps.jpg}
+        \caption{Missing data (shown in yellow) from across all 10 air quality measurement stations and 16 CCTV cameras for an 8-month period, early March to early November 2022.}
+        \label{fig:availability}
+    \\end{figure}"""
     
-    # response = rewrite_logic_issue_reflect('Introduction', example_content, example_feedback, example_structure, 1)
+    example_feedback = """I hope to make this chapter written more brilliantly."""
+    
+    example_structure = {'nodes': [{'name': 'Data Collection', 'content': 'Air quality data collected from 10 monitoring stations and traffic data from 16 CCTV cameras in Dalat City, Vietnam, from March 2020 to 7th Nov 2022.', 'parents': []}, {'name': 'Data Components', 'content': 'The data includes concentrations of various air pollutants and environmental measures, as well as traffic data in the form of images.', 'parents': ['Data Collection']}, {'name': 'Data Availability Visualization', 'content': "Figure~\\ref{fig:availability} displays the dataset's availability, highlighting significant gaps in the data.", 'parents': ['Data Collection']}, {'name': 'Data Gaps Highlight', 'content': 'The visualization shows huge gaps in data availability, which is a challenge for analysis.', 'parents': ['Data Availability Visualization']}, {'name': 'Model Building Approach', 'content': 'For machine learning model building, the first 80% of available data is used for training and the remaining 20% for validation.', 'parents': ['Data Gaps Highlight']}, {'name': 'Figure Reference', 'content': 'The figure referenced provides a visual representation of missing data across all monitoring stations and CCTV cameras for an 8-month period.', 'parents': ['Data Availability Visualization']}], 'edges': [{'from': 'Data Collection', 'to': 'Data Components'}, {'from': 'Data Collection', 'to': 'Data Availability Visualization'}, {'from': 'Data Availability Visualization', 'to': 'Data Gaps Highlight'}, {'from': 'Data Gaps Highlight', 'to': 'Model Building Approach'}, {'from': 'Data Availability Visualization', 'to': 'Figure Reference'}]}
+    
+    response = rewrite_logic_issue_reflect('Data Analysis', example_content, example_feedback, example_structure, 1)
     
     # test2_section = {'Introduction': example_content, 'Method': example_content}
     # test2_review = {'Introduction': example_feedback, 'Method': example_feedback}
     # test2_section_structure = {'Introduction': example_structure, 'Method': example_structure}
     # response = rewrite_logic_issue_async_reflect(test2_section, test2_section_structure, test2_review)
     # print(response)
+
