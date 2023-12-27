@@ -3,8 +3,8 @@ from io import StringIO
 import numpy as np
 import streamlit as st
 import time
-
-from content_analysis import section_analysis_async
+from rewrite import *
+from content_analysis import section_analysis_async, modify_scheme_design
 from paper_scoring import paper_scoring
 from util import *
 from paper_class import *
@@ -106,6 +106,45 @@ def slot_rescoring():
     st.session_state['paper'].paper_score = np.mean(list(paper.dt_score.values()))
 
 
+def slot_cache_paper():
+    paper = st.session_state['paper']
+    save_cache(paper)
+    st.success('Save successful!')
+
+
+def slot_rewrite_language_issue(section_label):
+    paper = st.session_state['paper']
+    polishing_section = rewrite_language_issue(section_label, paper.dt_section_content[section_label], paper.dt_analysis_result[section_label])
+    st.session_state['paper'].dt_polishing_result[section_label] = polishing_section
+
+
+def slot_rewrite_logic_issue(section_label):
+    paper = st.session_state['paper']
+    polishing_section = rewrite_logic_issue(section_label, paper.dt_section_content[section_label], paper.dt_analysis_result[section_label],
+                                            paper.dt_section_structure[section_label])
+    st.session_state['paper'].dt_polishing_result[section_label] = polishing_section
+
+
+def slot_rewrite_issue(section_label):
+    paper = st.session_state['paper']
+    polishing_section = rewrite_language_issue(section_label, paper.dt_section_content[section_label], paper.dt_analysis_result[section_label])
+    polishing_section = rewrite_logic_issue(section_label, polishing_section, paper.dt_analysis_result[section_label],
+                                            paper.dt_section_structure[section_label])
+    st.session_state['paper'].dt_polishing_result[section_label] = polishing_section
+
+
+def slot_rewrite_with_review(section_label, review, box_title, rewite_type):
+    paper = st.session_state['paper']
+    if rewite_type == 'design_input':
+        review = modify_scheme_design(review, section_label, paper.dt_section_content[section_label], paper.dt_section_structure[section_label],
+                                      paper.overall_structure)
+        print(review)
+    polishing_section = rewrite_logic_issue_reflect(section_label, paper.dt_section_content[section_label], review,
+                                                    paper.dt_section_structure[section_label])
+    st.session_state['paper'].dt_polishing_result[section_label] = polishing_section
+    toggle_custom_input(box_title, rewite_type)
+
+
 def review_system_page(placeholder):
     with placeholder.container():
         paper = st.session_state['paper']
@@ -128,7 +167,11 @@ def review_system_page(placeholder):
             st.write(f"Substantiveness: {paper.dt_score['Substantiveness']} / 10")
 
         # "重新评分" 按钮
-        st.button("Rescoring", on_click=slot_rescoring)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.button("Rescoring", on_click=slot_rescoring)
+        with col2:
+            st.button("Cache polishing results", on_click=slot_cache_paper)
 
         # 循环创建框和按钮，假设创建两个框，可以按照需要进行修改
         ls_section_label = list(paper.dt_section_content.keys())
@@ -147,11 +190,11 @@ def review_system_page(placeholder):
                     # 按钮横向排列
                     btn_cols = st.columns(5)  # 5个按钮分布于5列，自适应宽度
                     with btn_cols[0]:
-                        st.button('Language polishing', key=f'lang_btn_{i}')
+                        st.button('Language polishing', on_click=slot_rewrite_language_issue, args=(section_label,), key=f'lan_btn_{i}')
                     with btn_cols[1]:
-                        st.button('Structural polishing', key=f'struct_btn_{i}')
+                        st.button('Structural polishing', on_click=slot_rewrite_logic_issue, args=(section_label,), key=f'struct_btn_{i}')
                     with btn_cols[2]:
-                        st.button('Section polishing', key=f'chapter_btn_{i}')
+                        st.button('Section polishing', on_click=slot_rewrite_issue, args=(section_label,), key=f'chapter_btn_{i}')
                     with btn_cols[3]:
                         if st.button('Custom polishing', key=f'custom_btn_{i}'):
                             toggle_custom_input(box_title, 'custom_input')
@@ -163,25 +206,19 @@ def review_system_page(placeholder):
                     if st.session_state.get(f'show_custom_input_{box_title}', False):
                         with st.form(key=f'custom_form_{i}'):
                             custom_input = st.text_area('Please enter your custom polishing requests:')
-                            submit_button = st.form_submit_button(label='Confirm')
-                            if submit_button:
-                                right_col.markdown(f'#### {box_title} 自定义润色要求')
-                                right_col.write(custom_input)
-                                toggle_custom_input(box_title, 'custom_input')
+                            st.form_submit_button(on_click=slot_rewrite_with_review,
+                                                  args=(section_label, custom_input, box_title, 'custom_input'), label='Confirm')
 
                     # 如果点击了“设计润色方案”，显示设计方案输入框和确认按钮
                     if st.session_state.get(f'show_design_input_{box_title}', False):
                         with st.form(key=f'design_form_{i}'):
                             design_input = st.text_area('How would you like to design the polish plan?')
-                            submit_button = st.form_submit_button(label='Confirm')
-                            if submit_button:
-                                right_col.markdown(f'#### {box_title} 设计润色方案')
-                                right_col.write(design_input)
-                                toggle_custom_input(box_title, 'design_input')
+                            st.form_submit_button(on_click=slot_rewrite_with_review,
+                                                  args=(section_label, design_input, box_title, 'design_input'), label='Confirm')
 
                 with right_col:
                     st.subheader(f'{section_label} - Polishing results')
-                    st.markdown("", unsafe_allow_html=True)
+                    st.markdown(paper.dt_polishing_result[section_label], unsafe_allow_html=True)
 
 
 if 'file_uploaded' not in st.session_state:

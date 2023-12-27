@@ -61,7 +61,7 @@ The content of the section is: {section_content}
 
 Formatting Requirements:
 
-Present your output in Markdown format. Convert LaTeX section content to Markdown, omitting images, tables, and other non-textual elements. Divide your output into "Section Content with Annotations" and "Logical Flow Commentary."
+Present your output in Markdown format (You need to output in markdown format, not this latex text should be converted to markdown format). Convert LaTeX section content to Markdown, omitting images, tables, and other non-textual elements. Divide your output into "Section Content with Annotations" and "Logical Flow Commentary."
 "Section Content with Annotations": Wrap any sentences with language issues in "@" symbols and immediately follow them with a parenthesis stating what the issue is.
 "Logical Flow Commentary": After presenting the annotated section, add a separate part summarizing the logical flow of the paragraph. State whether it's logical or if any issues are present, and describe them briefly.
 Please focus solely on the language-related logical flow issues for this task, without considering the factual accuracy of the content.

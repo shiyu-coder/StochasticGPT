@@ -101,10 +101,14 @@ class Paper:
 
 
 if __name__ == '__main__':
-    file_name = 'DCU-AQ.tex.pkl'
-    ls_cache = joblib.load(f"{root_cache_path}/{file_name}")
-    print(ls_cache)
-    title = "Managing Large Dataset Gaps in Urban Air Quality Prediction: DCU-Insight-AQ at MediaEval 2022"
+    file_name = 'DCU-AQ.tex'
+    # ls_cache = joblib.load(f"{root_cache_path}/{file_name}")
+    paper = load_from_cache(file_name)
+    section_name = 'Data Analysis'
+    print(paper.dt_section_content[section_name])
+    print(paper.dt_section_structure[section_name])
+
+    # title = "Managing Large Dataset Gaps in Urban Air Quality Prediction: DCU-Insight-AQ at MediaEval 2022"
     # dt_polishing_result = {}
     # for section_label in ls_cache[4].keys():
     #     dt_polishing_result[section_label] = ""

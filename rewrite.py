@@ -2,9 +2,9 @@ import re
 import openai
 import os
 from dotenv import load_dotenv
-load_dotenv(dotenv_path = ".env")
-openai.api_base = os.environ["OPENAI_API_BASE"]
-openai.api_key = os.environ["OPENAI_API_KEY"]
+# load_dotenv(dotenv_path = ".env")
+# openai.api_base = os.environ["OPENAI_API_BASE"]
+# openai.api_key = os.environ["OPENAI_API_KEY"]
 from llm_api import llm_request
 from util import multiprocess, get_cpu_count
 
@@ -407,8 +407,8 @@ if __name__ == '__main__':
 of what specific equipment would have been appropriate for their unique status. This leaves the reader with a question of what the author means by \
 "equipped accordingly," which slightly disrupts the flow."""
 
-    # response = rewrite_language_issue('Introduction', test_content, test_review_language)
-    # print(response)
+    response = rewrite_language_issue('Introduction', test_content, test_review_language)
+    print(response)
     
     # test2_section = {'Introduction': test_content, 'Method': test_content}
     # test2_review = {'Introduction': test_review, 'Method': test_review}
@@ -458,8 +458,8 @@ of what specific equipment would have been appropriate for their unique status. 
     
     # response = rewrite_logic_issue_reflect('Introduction', example_content, example_feedback, example_structure, 1)
     
-    test2_section = {'Introduction': example_content, 'Method': example_content}
-    test2_review = {'Introduction': example_feedback, 'Method': example_feedback}
-    test2_section_structure = {'Introduction': example_structure, 'Method': example_structure}
-    response = rewrite_logic_issue_async_reflect(test2_section, test2_section_structure, test2_review)
-    print(response)
+    # test2_section = {'Introduction': example_content, 'Method': example_content}
+    # test2_review = {'Introduction': example_feedback, 'Method': example_feedback}
+    # test2_section_structure = {'Introduction': example_structure, 'Method': example_structure}
+    # response = rewrite_logic_issue_async_reflect(test2_section, test2_section_structure, test2_review)
+    # print(response)

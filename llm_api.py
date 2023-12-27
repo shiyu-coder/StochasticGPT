@@ -14,15 +14,15 @@ import tiktoken
 from langchain.embeddings import OpenAIEmbeddings
 
 
-# openai_api_base = "http://27.102.66.157:8000/v1"
-# with open("../openai_key", "r") as f:
-#     openai_api_key = f.read().strip()
-# openai.api_base = openai_api_base
-# openai.api_key = openai_api_key
-from dotenv import load_dotenv
-load_dotenv(dotenv_path = ".env")
-openai.api_base = os.environ["OPENAI_API_BASE"]
-openai.api_key = os.environ["OPENAI_API_KEY"]
+openai_api_base = "http://27.102.66.157:8000/v1"
+with open("../openai_key", "r") as f:
+    openai_api_key = f.read().strip()
+openai.api_base = openai_api_base
+openai.api_key = openai_api_key
+# from dotenv import load_dotenv
+# load_dotenv(dotenv_path = ".env")
+# openai.api_base = os.environ["OPENAI_API_BASE"]
+# openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
 def get_date(date0, days):
