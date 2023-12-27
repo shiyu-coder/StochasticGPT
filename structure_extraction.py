@@ -8,6 +8,50 @@ from langchain.document_loaders.text import TextLoader
 from langchain.text_splitter import LatexTextSplitter
 from util import multiprocess, get_cpu_count
 
+
+def strip_comments(latex_content):
+    """移除LaTeX内容中的注释部分。"""
+    # 使用非贪婪模式的正则表达式删除非转义的百分号后的所有内容
+    return re.sub(r'(?<!\\)%.*', '', latex_content)
+
+
+def normalize_newlines(content):
+    """替换掉不规则的换行符，返回规范化的内容。"""
+    return re.sub(r'\n\s+', ' ', content)
+
+
+def extract_title(latex_content):
+    """
+    从LaTeX内容中尽可能鲁棒地提取论文的题目。
+    """
+    # 移除注释以避免它们干扰标题的提取
+    stripped_content = strip_comments(latex_content)
+
+    # 替换换行符和过多的空格，以获取连续的文本
+    content = normalize_newlines(stripped_content)
+
+    # 搜索 title 命令及其内容
+    title_match = re.search(r'\\title\s*\{(.+?)\}', content)
+    if title_match:
+        # 提取 title 并去除可能存在的 LaTeX 命令
+        # 但允许保留转义字符，如 \textbf{\title}
+        title = title_match.group(1).strip()
+
+        # 移除LaTeX命令，但保留命令的参数
+        # 如 \textbf{Title} -> Title
+        title = re.sub(r'\\[^\{\}]+(\{[^}]*\})', r'\1', title)
+
+        # 去掉命令后的大括号
+        title = re.sub(r'[{}]', '', title)
+
+        # 将文本连成一行，并去除双空格
+        title = re.sub(r'\s+', ' ', title).strip()
+
+        return title
+    else:
+        return None
+
+
 overall_structure_extraction_prompt = """
 I am working with a LaTeX-formatted academic paper and require assistance in organizing its content logically. My goal is to construct a directed acyclic graph (DAG) that depicts the contextual relationships throughout the paper.
 
@@ -235,6 +279,7 @@ if __name__ == '__main__':
     root_path = f"../StochasticGPT_data/paper/2212.10273/DCU-AQ.tex"
     paper_text = TextLoader(root_path).load()[0].page_content
     print(paper_text)
+    # print(extract_title(paper_text))
 
     # dt_paper_info = extract_paper_structure(paper_text)
 

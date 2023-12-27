@@ -135,6 +135,8 @@ def section_analysis(section_label, section_content, section_structure, overall_
 
 
 def section_analysis_async(dt_section, dt_section_structure, overall_structure):
+    print("Analysis section asynchronously")
+
     def fun(section_pair, overall_structure):
         section_label, section_content, section_structure = section_pair
         return section_analysis(section_label, section_content, section_structure, overall_structure)
