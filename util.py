@@ -1,4 +1,5 @@
 import os
+from io import StringIO
 from multiprocessing import Process, cpu_count
 import joblib
 
@@ -92,5 +93,16 @@ def collect_data(prefix, num):
         data.extend(d)
         os.remove(fn)
     return data
+
+
+def process_uploaded_paper_data(uploaded_file):
+    bytes_data = uploaded_file.getvalue()
+    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+    string_data = stringio.read()
+    return string_data
+
+
+
+
 
 

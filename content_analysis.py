@@ -32,7 +32,7 @@ _content_analysis_prompt = """
 <1> 语言表达方面：检查内容是否有语法错误、口语化表达、不够好的表达等问题
 <2> 行文逻辑方面：检查内容的行文逻辑是否合理，上下文衔接是否顺畅，是否存在逻辑不通顺等问题
 2. 无论是整篇文章的行文逻辑，还是单个section的行文逻辑，都是使用JSON-encoded directed acyclic graph (DAG)的结构表示
-3. 整篇文章的逻辑结构为：{paper_structure}
+3. 整篇文章的逻辑结构为：{overall_structure}
 4. 这个section的逻辑结构为：{section_structure}
 5. 这个section的内容为：{section_content}
 6. 输出格式要求：
@@ -91,12 +91,32 @@ of what specific equipment would have been appropriate for their unique status. 
 "equipped accordingly," which slightly disrupts the flow.
 """
 
-modify_scheme_design_prompt = """
+_modify_scheme_design_prompt = """
+请你完成一个英文论文（latex格式）的一个section（标题为{section_label}）的语言润色任务，具体的要求如下：
+1. 我有一个大概的润色要求供你参考：{user_instruction}
+2. 整篇论文的逻辑结构为：{overall_structure}
+3. 这个section的逻辑结构为：{section_structure}
+4. 这个section的内容为：{section_content}
+请你参考我的润色要求和文章片段设计一个更加具体的润色方案，并分点给出。
+注意：只关注语言表达方面，不要关注section讲述的具体内容是否合理和正确。
+Please only provide suggestions for improvement, not the results of the improvement.
+"""
 
+modify_scheme_design_prompt = """
+I need assistance with an English-language editing task for a specific section of a LaTeX-formatted academic paper. The details are as follows:
+
+Editing instructions provided for reference: {user_instruction}
+The logical flow of the entire paper: {overall_structure}
+The logical flow within the specific section: {section_structure}
+The content of the section needing language polishing: {section_content}
+Please devise a language polishing plan based on these provided elements, and outline the plan in bullet points. Keep in mind that the focus should be solely on linguistic expression; there's no need to evaluate the actual subject matter for its validity or accuracy.
+Please only provide suggestions for improvement, not the results of the improvement.
 """
 
 
 def section_analysis(section_label, section_content, section_structure, overall_structure):
+    if len(section_content) < 100:
+        return section_content
     request = content_analysis_prompt.format(section_label=section_label, paper_structure=overall_structure, section_structure=section_structure,
                                              section_content=section_content,
                                              content_analysis_example=content_analysis_example)
@@ -115,6 +135,7 @@ def section_analysis(section_label, section_content, section_structure, overall_
 
 
 def section_analysis_async(dt_section, dt_section_structure, overall_structure):
+    print("Analysis section asynchronously")
 
     def fun(section_pair, overall_structure):
         section_label, section_content, section_structure = section_pair
@@ -133,7 +154,21 @@ def section_analysis_async(dt_section, dt_section_structure, overall_structure):
 
 
 def modify_scheme_design(user_instruction, section_label, section_content, section_structure, overall_structure):
-    pass
+    request = modify_scheme_design_prompt.format(user_instruction=user_instruction, section_label=section_label, overall_structure=overall_structure,
+                                                 section_structure=section_structure,
+                                                 section_content=section_content)
+    max_try = 3
+    try_count = 0
+    while try_count < max_try:
+        try:
+            reply = llm_request(request)
+            reply = replace_at_sentences(reply)
+            return reply
+        except KeyboardInterrupt:
+            return
+        except:
+            traceback.print_exc()
+            try_count += 1
 
 
 if __name__ == '__main__':
@@ -157,18 +192,19 @@ if __name__ == '__main__':
                                  {'from': 'Conclusions and Lessons Learned', 'to': 'Acknowledgements'}]}
 
     section_structure = {'nodes': [
-                      {'name': 'Challenge Overview',
-                       'content': 'The Urban Life and Air Pollution task at MediaEval 2022 is introduced, which required participants to predict the air quality index (AQI) value at future intervals using a variety of data sources.',
-                       'parents': []}, {'name': 'Data Gaps Issue',
-                                        'content': 'The paper acknowledges the common issue of gaps in air quality datasets, which is particularly problematic in poorer or developing countries.',
-                                        'parents': ['Challenge Overview']}, {'name': 'Research Contribution',
-                                                                             'content': 'The paper outlines its contribution by describing the approach taken to address the large gaps in the air quality data encountered.',
-                                                                             'parents': ['Data Gaps Issue']}], 'edges': [
-                      {'from': 'Challenge Overview', 'to': 'Data Gaps Issue'}, {'from': 'Data Gaps Issue', 'to': 'Research Contribution'}]}
+        {'name': 'Challenge Overview',
+         'content': 'The Urban Life and Air Pollution task at MediaEval 2022 is introduced, which required participants to predict the air quality index (AQI) value at future intervals using a variety of data sources.',
+         'parents': []}, {'name': 'Data Gaps Issue',
+                          'content': 'The paper acknowledges the common issue of gaps in air quality datasets, which is particularly problematic in poorer or developing countries.',
+                          'parents': ['Challenge Overview']}, {'name': 'Research Contribution',
+                                                               'content': 'The paper outlines its contribution by describing the approach taken to address the large gaps in the air quality data encountered.',
+                                                               'parents': ['Data Gaps Issue']}], 'edges': [
+        {'from': 'Challenge Overview', 'to': 'Data Gaps Issue'}, {'from': 'Data Gaps Issue', 'to': 'Research Contribution'}]}
 
     section_content = '\\label{sec:intro}\n\n\\begin{comment}\n% Just in case we want some form of Intro\nAccording to the World Health Organisation (WHO), 91\\% of the world\'s population reside in conditions where WHO\'s air quality guidelines levels were not met \\cite{organizacion2021global}. This report on 2016 also showed that ambient (outdoor) air pollution in both cities and rural areas was estimated to cause 4.2 million premature deaths worldwide. The research concluded that policies and investments supporting cleaner transport, energy-efficient homes, power generation, industry and better municipal waste management would would be crucial to the reduction of outdoor air pollution. In a separate report, it is estimated that air pollution globally accounts for roughly seven million premature deaths a year \\cite{Gar21}, where it was again stated that the majority of those deaths are caused by outdoor air pollution with the rest generally attributed to poor air quality from indoor cooking. While the majority of these deaths occur in developing countries, with China and India accounting for roughly 50\\%, developed countries also have a problem with deaths resulting from air pollution.\nIn this research, the focus will mostly be on the modelling of concentrations in particulate matter - tiny particles in the air generated both by natural processes and human activity. These particles are generally \n12  categorised (in the public health domain) by their diameter; fine particles with diameter less than 2.5 $\\mu$m are referred to as "PM2.5" and coarse particles with diameter between 2.5 and 10 $\\mu$m are referred to as "PM10".\\\\\n\\end{comment}\n\nThe Urban Life and Air Pollution task at MediaEval 2022 required participants to predict the air quality index (AQI) value at +1, +5 and +7 days using an archive of air quality, weather and images from 16 CCTV cameras, one image taken every 60 seconds  \\cite{UA22}. Participating groups were required to download the data from online sources for local processing.\nGaps in air quality datasets are common with the problem exacerbated for data gathered in poorer or developing countries \\cite{PINDER2019116794, Falge2001, Hui2004, Moffat2007, Kim2020}. In this paper we describe how we addressed the very large gaps in data that we encountered in the data we downloaded.\n\n\n%\\section{Related Work}\n%\\label{sec:rr}\n%.. a snapshot of how our graph? technique has been used for solving other problems.\n\n% Mark: I restructured this to stop duplication of text'
     section_label = "Introduction"
 
-    print(section_analysis(section_label, section_content, section_structure, paper_structure))
+    # print(section_analysis(section_label, section_content, section_structure, paper_structure))
 
-
+    user_input = "Please help to make the language expression more beautiful"
+    print(modify_scheme_design(user_input, section_label, section_content, section_structure, paper_structure))
