@@ -11,7 +11,7 @@ from util import multiprocess, get_cpu_count
 
 def replace_at_sentences(text):
     # 定义正则表达式模式，匹配@句子@(句子)格式
-    pattern = re.compile(r'@([^@]+)@\(([^)]+)\)')
+    pattern = re.compile(r'@\s*([^@]+)\s*@\s*\(([^)]+)\)')
 
     # 替换函数
     def replace(match):

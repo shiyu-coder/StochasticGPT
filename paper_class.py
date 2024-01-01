@@ -98,15 +98,15 @@ class Paper:
         self.title, self.paper_content, self.overall_structure, self.dt_section_structure, self.dt_section_content, self.dt_analysis_result, self.paper_score, self.dt_score, self.dt_polishing_result = ls_cache
 
 
-
-
 if __name__ == '__main__':
-    file_name = 'DCU-AQ.tex'
+    file_name = 'DCU-AQ.tex_lan'
     # ls_cache = joblib.load(f"{root_cache_path}/{file_name}")
-    paper = load_from_cache(file_name)
-    section_name = 'Data Analysis'
-    print(paper.dt_section_content[section_name])
-    print(paper.dt_section_structure[section_name])
+    ls_cache = joblib.load(f"exp_result/our_method/{file_name}.pkl")
+    paper = Paper()
+    paper.load_cache(ls_cache)
+    paper.file_name = file_name
+    print(paper)
+    print(paper.dt_polishing_result)
 
     # title = "Managing Large Dataset Gaps in Urban Air Quality Prediction: DCU-Insight-AQ at MediaEval 2022"
     # dt_polishing_result = {}
