@@ -165,7 +165,7 @@ def rewrite_logic_issue_async(dt_section, dt_section_structure, dt_review):
 
 def reflect(section_label, original_text, logical_structure, review_advise, modified_text):
     revise_requirements = """The modification should adhere to three criteria: 
-                (1) fidelity, ensuring the revised text remains true to the original intent and content, and 
+                (1) fidelity, ensuring that the revised text is faithful to the intent and content of original section and does not add information that is not in the original section, and 
                 (2) improved logical flow, making the content more academically sound, clear, and engaging, and
                 (3) integrity, ensuring that no information loss occurs, and maintaining the integrity of the original information as much as possible."""
     
