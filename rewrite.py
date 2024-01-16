@@ -38,7 +38,7 @@ Gaps in air quality datasets are common with the problem exacerbated for data ga
 
         revised result: {revise_result}
         
-        (End of example)
+        [End of example]
         
         The content of the section is: {section_content}
 
@@ -128,7 +128,7 @@ def rewrite_logic_issue(section_label, section_content, section_review, section_
                 review advise: {example_review}
 
                 revised result: {revise_result}
-                (End of example)
+                [End of example]
                 
                 The section you will be revising and corresponding review advise are as follows: 
                 
